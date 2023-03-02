@@ -15,6 +15,9 @@ repositories {
 }
 
 dependencies {
+    implementation("io.ktor:ktor-server-core-jvm:2.2.3")
+    implementation("io.ktor:ktor-server-host-common-jvm:2.2.3")
+    implementation("io.ktor:ktor-server-status-pages-jvm:2.2.3")
     testImplementation(kotlin("test"))
 
     implementation("io.ktor:ktor-server-core:2.2.3")
@@ -22,6 +25,8 @@ dependencies {
 
     implementation("ch.qos.logback:logback-classic:1.4.4")
     implementation("org.slf4j:slf4j-api:2.0.3")
+
+    implementation("io.ktor:ktor-server-status-pages:2.1.2")
 }
 
 tasks.test {
