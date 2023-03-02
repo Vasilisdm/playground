@@ -5,8 +5,13 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import org.slf4j.LoggerFactory
+
+private val logger = LoggerFactory.getLogger("com.vgdm.Application")
 
 fun main() {
+    logger.debug("Starting application...")
+
     embeddedServer(Netty, port = 4207, module = Application::module).start(wait = true)
 }
 
