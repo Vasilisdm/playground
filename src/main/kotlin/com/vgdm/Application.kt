@@ -16,7 +16,8 @@ private val logger = LoggerFactory.getLogger("com.vgdm.Application")
 fun main() {
     logger.debug("Starting application...")
 
-    val config = appConfiguration()
+    val environment = System.getenv("KAPP_ENV") ?: "local"
+    val config = appConfiguration(environment)
 
     embeddedServer(Netty, port = config.httpPort, module = Application::module).start(wait = true)
 }
@@ -38,9 +39,10 @@ fun Application.module() {
     createKtorApplication()
 }
 
-private fun appConfiguration(): WebAppConfig =
+private fun appConfiguration(environment: String): WebAppConfig =
     ConfigFactory
-        .parseResources("app.conf")
+        .parseResources("app-${environment}.conf")
+        .withFallback(ConfigFactory.parseResources("app.conf"))
         .resolve()
         .let {
             WebAppConfig(
