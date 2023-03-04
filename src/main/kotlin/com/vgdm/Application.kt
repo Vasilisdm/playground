@@ -62,6 +62,7 @@ private fun appConfiguration(environment: String): WebAppConfig =
         .resolve()
         .let {
             WebAppConfig(
-                httpPort = it.getInt("httpPort")
+                httpPort = it.getInt("httpPort"),
+                dbPassword = it.getInt("dbPassword")
             )
         }
