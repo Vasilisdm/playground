@@ -22,7 +22,6 @@ fun main() {
 
     val secretsRegex = "password|secret|key"
         .toRegex(RegexOption.IGNORE_CASE)
-
     val configRepresentation = WebAppConfig::class.declaredMemberProperties
         .sortedBy { it.name }
         .map {
@@ -33,7 +32,7 @@ fun main() {
             } }
         .joinToString(separator = "\n")
 
-    logger.debug("Current configuration: $configRepresentation")
+    logger.debug("Configuration loaded successfully: $configRepresentation")
 
     embeddedServer(Netty, port = config.httpPort, module = Application::module).start(wait = true)
 }
