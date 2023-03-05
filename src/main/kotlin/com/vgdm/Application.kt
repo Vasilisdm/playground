@@ -29,7 +29,8 @@ fun main() {
                 "${it.name} = ${it.get(config).toString().take(2)}*****"
             } else {
                 "${it.name} = ${it.get(config)}"
-            } }
+            }
+        }
         .joinToString(separator = "\n")
 
     logger.debug("Configuration loaded successfully: $configRepresentation")
@@ -40,7 +41,7 @@ fun main() {
 fun Application.createKtorApplication() {
     routing {
         get("/") {
-            call.respondText("Hello, world!")
+            call.respondText("Hello, World!")
         }
     }
 }
