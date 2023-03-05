@@ -1,7 +1,11 @@
 package com.vgdm
 
 import com.typesafe.config.ConfigFactory
-import com.vgdm.infrastructure.WebAppConfig
+import com.vgdm.application.httpResponses.JsonWebResponse
+import com.vgdm.application.httpResponses.TextWebResponse
+import com.vgdm.application.httpResponses.WebResponse
+import com.vgdm.infrastructure.configuration.WebAppConfig
+import com.vgdm.infrastructure.gsonResponse.KtorJsonWebResponse
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -9,6 +13,7 @@ import io.ktor.server.netty.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.util.pipeline.*
 import org.slf4j.LoggerFactory
 import kotlin.reflect.full.declaredMemberProperties
 
@@ -40,11 +45,46 @@ fun main() {
 
 fun Application.createKtorApplication() {
     routing {
-        get("/") {
-            call.respondText("Hello, World!")
+        get("/", webResponse {
+            TextWebResponse("Hello, world!")
+        })
+
+        get("/json_test", webResponse {
+            JsonWebResponse(mapOf("foo" to "bar"))
+        })
+    }
+}
+
+fun webResponse(
+    handler: suspend PipelineContext<Unit, ApplicationCall>.() -> WebResponse
+): PipelineInterceptor<Unit, ApplicationCall> {
+    return {
+        val webResponseInstance = this.handler()
+        for ((name, values) in webResponseInstance.headers) {
+            for (value in values) {
+                call.response.header(name, value)
+            }
+        }
+
+        val statusCode = HttpStatusCode.fromValue(webResponseInstance.statusCode)
+
+        when (webResponseInstance) {
+            is TextWebResponse -> {
+                call.respondText(text = webResponseInstance.body, status = statusCode)
+            }
+
+            is JsonWebResponse -> {
+                call.respond(
+                    KtorJsonWebResponse(
+                        body = webResponseInstance.body,
+                        status = statusCode
+                    )
+                )
+            }
         }
     }
 }
+
 
 fun Application.module() {
     install(StatusPages) {

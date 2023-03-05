@@ -34,7 +34,7 @@ sealed class WebResponse {
         )
 }
 
-data class TextResponse(
+data class TextWebResponse(
     val body: String,
     override val statusCode: Int = 200,
     override val headers: Map<String, List<String>> = mapOf()
@@ -43,7 +43,7 @@ data class TextResponse(
         copy(body = body, statusCode = statusCode, headers = headers)
 }
 
-data class JsonResponse(
+data class JsonWebResponse(
     val body: Any?,
     override val statusCode: Int = 200,
     override val headers: Map<String, List<String>> = mapOf()

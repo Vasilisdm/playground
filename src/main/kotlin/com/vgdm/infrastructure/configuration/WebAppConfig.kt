@@ -1,4 +1,4 @@
-package com.vgdm.infrastructure
+package com.vgdm.infrastructure.configuration
 
 data class WebAppConfig(
     val httpPort: Int,

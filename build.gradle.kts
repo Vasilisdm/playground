@@ -29,6 +29,8 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages:2.1.2")
 
     implementation("com.typesafe:config:1.4.2")
+
+    implementation("com.google.code.gson:gson:2.10")
 }
 
 tasks.test {
