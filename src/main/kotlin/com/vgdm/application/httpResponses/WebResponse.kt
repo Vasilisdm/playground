@@ -9,6 +9,15 @@ sealed class WebResponse {
         headers: Map<String, List<String>>
     ): WebResponse
 
+    fun headers(): Map<String, List<String>> =
+        headers
+            .map { it.key.lowercase() to it.value }
+            .fold(mapOf()) { headersList, (headerKey, headerValue) ->
+                headersList.plus(
+                    Pair(headerKey, headersList.getOrDefault(headerKey, listOf()).plus(headerValue))
+                )
+            }
+
     fun header(headerName: String, headerValue: String) =
         header(headerName, listOf(headerValue))
 
