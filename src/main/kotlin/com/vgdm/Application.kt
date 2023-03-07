@@ -6,6 +6,7 @@ import com.vgdm.application.httpResponses.TextWebResponse
 import com.vgdm.application.httpResponses.WebResponse
 import com.vgdm.infrastructure.configuration.WebAppConfig
 import com.vgdm.infrastructure.gsonResponse.KtorJsonWebResponse
+import com.zaxxer.hikari.HikariDataSource
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -25,6 +26,14 @@ fun main() {
     val environment = System.getenv("KAPP_ENV") ?: "local"
     val config = appConfiguration(environment)
 
+    val dataSource = createDataSource(config)
+    dataSource.connection.use { connection ->
+        connection.createStatement()
+            .use { statement ->
+                statement.executeQuery("SELECT 1")
+            }
+    }
+
     val secretsRegex = "password|secret|key"
         .toRegex(RegexOption.IGNORE_CASE)
     val configRepresentation = WebAppConfig::class.declaredMemberProperties
@@ -37,7 +46,6 @@ fun main() {
             }
         }
         .joinToString(separator = "\n")
-
     logger.debug("Configuration loaded successfully: $configRepresentation")
 
     embeddedServer(Netty, port = config.httpPort, module = Application::module).start(wait = true)
@@ -103,6 +111,14 @@ private fun appConfiguration(environment: String): WebAppConfig =
         .let {
             WebAppConfig(
                 httpPort = it.getInt("httpPort"),
-                dbPassword = it.getInt("dbPassword")
+                dbUser = it.getString("dbUser"),
+                dbPassword = it.getString("dbPassword"),
+                dbUrl = it.getString("dbUrl")
             )
         }
+
+fun createDataSource(config: WebAppConfig): HikariDataSource = HikariDataSource().apply {
+    jdbcUrl = config.dbUrl
+    username = config.dbUser
+    password = config.dbPassword
+}

@@ -2,5 +2,7 @@ package com.vgdm.infrastructure.configuration
 
 data class WebAppConfig(
     val httpPort: Int,
-    val dbPassword: Int
+    val dbUser: String,
+    val dbPassword: String,
+    val dbUrl: String
 )
