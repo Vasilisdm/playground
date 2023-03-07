@@ -15,7 +15,9 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.pipeline.*
+import org.flywaydb.core.Flyway
 import org.slf4j.LoggerFactory
+import javax.sql.DataSource
 import kotlin.reflect.full.declaredMemberProperties
 
 private val logger = LoggerFactory.getLogger("com.vgdm.Application")
@@ -63,6 +65,26 @@ fun Application.createKtorApplication() {
     }
 }
 
+fun Application.module() {
+    install(StatusPages) {
+        exception<Throwable> { call, cause ->
+            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
+        }
+    }
+    createKtorApplication()
+}
+
+fun migrateDataSource(dataSource: DataSource) {
+    Flyway.configure()
+        .dataSource(dataSource)
+        .locations("db/migration")
+        .table("flyway_schema_history")
+        .load()
+        .migrate() }
+fun createAndMigrateDataSource(config: WebAppConfig) =
+    createDataSource(config).also(::migrateDataSource)
+
+
 fun webResponse(
     handler: suspend PipelineContext<Unit, ApplicationCall>.() -> WebResponse
 ): PipelineInterceptor<Unit, ApplicationCall> {
@@ -93,14 +115,10 @@ fun webResponse(
     }
 }
 
-
-fun Application.module() {
-    install(StatusPages) {
-        exception<Throwable> { call, cause ->
-            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
-        }
-    }
-    createKtorApplication()
+fun createDataSource(config: WebAppConfig): HikariDataSource = HikariDataSource().apply {
+    jdbcUrl = config.dbUrl
+    username = config.dbUser
+    password = config.dbPassword
 }
 
 private fun appConfiguration(environment: String): WebAppConfig =
@@ -116,9 +134,3 @@ private fun appConfiguration(environment: String): WebAppConfig =
                 dbUrl = it.getString("dbUrl")
             )
         }
-
-fun createDataSource(config: WebAppConfig): HikariDataSource = HikariDataSource().apply {
-    jdbcUrl = config.dbUrl
-    username = config.dbUser
-    password = config.dbPassword
-}
