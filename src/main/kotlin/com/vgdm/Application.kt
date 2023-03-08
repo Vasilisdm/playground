@@ -28,7 +28,7 @@ fun main() {
     val environment = System.getenv("KAPP_ENV") ?: "local"
     val config = appConfiguration(environment)
 
-    val dataSource = createDataSource(config)
+    val dataSource = createAndMigrateDataSource(config)
     dataSource.connection.use { connection ->
         connection.createStatement()
             .use { statement ->
@@ -81,9 +81,9 @@ fun migrateDataSource(dataSource: DataSource) {
         .table("flyway_schema_history")
         .load()
         .migrate() }
+
 fun createAndMigrateDataSource(config: WebAppConfig) =
     createDataSource(config).also(::migrateDataSource)
-
 
 fun webResponse(
     handler: suspend PipelineContext<Unit, ApplicationCall>.() -> WebResponse
